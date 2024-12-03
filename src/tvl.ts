@@ -5,7 +5,7 @@ interface PoolData {
   tvl: number;
 }
 
-export default async function getTvlFromId(poolId: string): Promise<number | null> {
+export default async function getTvlFromId(poolId: string): Promise<number> {
  
   const url = `https://api-v3.raydium.io/pools/info/ids?ids=${poolId}`;
   try {
@@ -19,10 +19,10 @@ export default async function getTvlFromId(poolId: string): Promise<number | nul
       }
     }
     console.log(`Pool ID ${poolId} not found or has no TVL.`);
-    return null;
+    return 0;
   } catch (error) {
     console.error(`An error occurred: ${error}`);
-    return null;
+    return 0;
   }
 }
 

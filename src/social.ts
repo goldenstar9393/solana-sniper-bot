@@ -11,11 +11,11 @@ const socialLinks = ['discord', 'twitter', 'telegram', 'website', 'medium', 'red
   ,'snapchat', 'pinterest', 'slack', 'signal', 'wechat', 'youtube', 'twitch', 'vimeo', 'quora', 'dribble', 'behance', 'roblox', 'bluesky' 
 ];
 
-export default async function getTokenMetadata() {
+export default async function getTokenMetadata(memeAccount : string) {
   const connection = new Connection(rpc_uri);
   const metaplex = Metaplex.make(connection);
 
-  const mintAddress = new PublicKey("2xnfwmo2kDqheTJqyMSdREjVB7YGvjtSDWKkuXP5pump");
+  const mintAddress = new PublicKey(memeAccount);
 
   let tokenName;
   let tokenSymbol;

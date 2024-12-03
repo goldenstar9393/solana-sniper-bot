@@ -1,5 +1,9 @@
 import { Connection, PublicKey } from '@solana/web3.js';
+import getTvlFromId from './tvl';
+import getTokenMetadata from './social';
 import * as dotenv from 'dotenv';
+import { WSOL } from '@raydium-io/raydium-sdk';
+import { limit_social, limit_tvl } from './config';
 
 dotenv.config();
 
@@ -52,18 +56,38 @@ async function fetchRaydiumMints(txId: string, connection: Connection) {
         const tokenAIndex = 8;
         const tokenBIndex = 9;
 
-        const poolAccount = accounts[poolIndex];
-        const tokenAAccount = accounts[tokenAIndex];
-        const tokenBAccount = accounts[tokenBIndex];
+        const poolAccount = accounts[poolIndex].toBase58();
+        const tokenAAccount = accounts[tokenAIndex].toBase58();
+        const tokenBAccount = accounts[tokenBIndex].toBase58();
     
         const displayData = [
-            {"Token": "Pool", "Account Public Key": poolAccount.toBase58()},
-            { "Token": "A", "Account Public Key": tokenAAccount.toBase58() },
-            { "Token": "B", "Account Public Key": tokenBAccount.toBase58() }
+            {"Token": "Pool", "Account Public Key": poolAccount},
+            { "Token": "A", "Account Public Key": tokenAAccount },
+            { "Token": "B", "Account Public Key": tokenBAccount }
         ];
 
         console.log("New LP Found");
         console.table(displayData);
+
+        if (tokenAAccount == WSOL.mint || tokenBAccount == WSOL.mint) {
+            let memeAccount = (tokenAAccount == WSOL.mint) ? tokenAAccount : tokenBAccount;
+
+            let tvl = await getTvlFromId(poolAccount);
+            let cntSocial = await getTokenMetadata(memeAccount);
+
+            if (tvl >= limit_tvl && cntSocial > limit_social) {
+
+            }
+            else {
+                console.log("Detect account is rug account");
+            }
+        }
+        else {
+            console.log("Detected account is not related with SOL");
+        }
+        
+
+
     
     } catch {
         console.log("Error fetching transaction:", txId);
