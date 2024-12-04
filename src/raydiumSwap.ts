@@ -11,7 +11,6 @@ import {
   Token,
   TokenAmount,
 } from "@raydium-io/raydium-sdk";
-import fs from "fs";
 import bs58 from 'bs58';
 import retry from 'async-await-retry';
 import BN from 'bn.js';
@@ -30,12 +29,7 @@ import {
   createSyncNativeInstruction,
   NATIVE_MINT,
 } from "@solana/spl-token";
-import * as dotenv from 'dotenv';
-
-dotenv.config();
-
-const raydium_auth_v4: string = process.env.RAYDIUM_AUTH_V4 || "";
-const rpc_uri: string = process.env.RPC_URI || "https://api.mainnet-beta.solana.com";
+import { raydium_auth_v4, rpc_uri } from "./config";
 
 const getPoolKeys = async (ammId: string, connection: Connection) => {
   const ammAccount = await connection.getAccountInfo(new PublicKey(ammId));
@@ -139,7 +133,6 @@ const makeSwapInstruction = async (
   let tokenOutAccount: PublicKey;
 
   if (tokenIn.toString() == WSOL.mint) {
-    // console.log(keyPair);
     tokenInAccount = (
       await getOrCreateAssociatedTokenAccount(
         connection,
@@ -148,7 +141,6 @@ const makeSwapInstruction = async (
         keyPair.publicKey,
       )
     ).address;
-    // console.log(keyPair);
     try {
       tokenOutAccount = (
         await getOrCreateAssociatedTokenAccount(
@@ -159,9 +151,6 @@ const makeSwapInstruction = async (
         )
       ).address;
     } catch (error) {
-
-      console.error("TokenOut Account Error:", error);
-      console.error("TokenOut Mint:", tokenOut.toBase58());
       tokenOutAccount = (
         await getOrCreateAssociatedTokenAccount(
           connection,
@@ -284,11 +273,14 @@ const executeTransaction = async (swapAmountIn: number, tokenToBuy: string, ammI
 
 
 export default async function retrytransaction(swapAmount: number, mintToBuy: string, poolAccount: string, wallet_private_key: string) {
+  console.log("swapAmount: ", swapAmount);
+  console.log("mintToBuy: ", mintToBuy);
+  console.log("poolAccount: ", poolAccount);
+  console.log("wallet_private_key: ", wallet_private_key);
   try {
     await retry(
-      async () =>
+      async () => 
         await executeTransaction(swapAmount, mintToBuy, poolAccount, wallet_private_key),
-      // await executeTransaction(0.00045, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v","dfadfs"),
       undefined,
       {
         retriesMax: 3,
@@ -296,7 +288,7 @@ export default async function retrytransaction(swapAmount: number, mintToBuy: st
       }
     );
       } catch (error) {
-    console.log("please try again manually");
+    console.log("An error is occured when the Transaction is retried");
   }
 }
 

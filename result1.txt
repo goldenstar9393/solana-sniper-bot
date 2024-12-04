@@ -1,0 +1,21 @@
+==================================================
+Local Time: 2024-11-29 01:54:40
+Block Time: 2024-11-29 01:54:26
+Time Diff: 0:00:14.964671
+Pool: ip8ABEdDEf2BPbX2kVbTB7zocQeK6uxvEDPHRwtrfL7
+Token0: Bs3sFFDQDWFyGdSyrwLsb9ccQatngc1eYz8NLgXewZBn
+Token1: So11111111111111111111111111111111111111112
+Is Immutable: No
+Owner: TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+==================================================
+
+==================================================
+Local Time: 2024-11-29 01:54:44
+Block Time: 2024-11-29 01:54:26
+Time Diff: 0:00:18.653852
+Pool: ip8ABEdDEf2BPbX2kVbTB7zocQeK6uxvEDPHRwtrfL7
+Token0: Bs3sFFDQDWFyGdSyrwLsb9ccQatngc1eYz8NLgXewZBn
+Token1: So11111111111111111111111111111111111111112
+Is Immutable: No
+Owner: TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+==================================================

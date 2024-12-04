@@ -1,20 +1,11 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import getTvlFromId from './tvl';
 import getTokenMetadata from './social';
-
-import * as dotenv from 'dotenv';
 import { WSOL } from '@raydium-io/raydium-sdk';
 import { limit_social, limit_tvl } from './config';
-
+import { HTTP_URL, WSS_URL, RAYDIUM_PUBLIC_KEY } from './config';
 import fundAndRefund from "./fund";
 
-dotenv.config();
-
-const HTTP_URL: string = process.env.RPC_URI || "https://api.mainnet-beta.solana.com";
-const WSS_URL: string = process.env.WSS_URI || "wss://api.mainnet-beta.solana.com";
-const public_key : string = process.env.PUBLIC_KEY || "";
-
-const RAYDIUM_PUBLIC_KEY:string = process.env.RAYDIUM_PUBLIC_KEY || "";
 const RAYDIUM = new PublicKey(RAYDIUM_PUBLIC_KEY);
 const INSTRUCTION_NAME = "initialize2";
 
@@ -49,7 +40,7 @@ async function fetchRaydiumMints(txId: string, connection: Connection) {
 
         //@ts-ignore
         const accounts = (tx?.transaction.message.instructions).find(ix => ix.programId.toBase58() === RAYDIUM_PUBLIC_KEY).accounts as PublicKey[];
-    
+
         if (!accounts) {
             console.log("No accounts found in the transaction.");
             return;
@@ -62,9 +53,9 @@ async function fetchRaydiumMints(txId: string, connection: Connection) {
         const poolAccount = accounts[poolIndex].toBase58();
         const tokenAAccount = accounts[tokenAIndex].toBase58();
         const tokenBAccount = accounts[tokenBIndex].toBase58();
-    
+
         const displayData = [
-            {"Token": "Pool", "Account Public Key": poolAccount},
+            { "Token": "Pool", "Account Public Key": poolAccount },
             { "Token": "A", "Account Public Key": tokenAAccount },
             { "Token": "B", "Account Public Key": tokenBAccount }
         ];
@@ -73,7 +64,7 @@ async function fetchRaydiumMints(txId: string, connection: Connection) {
         console.table(displayData);
 
         if (tokenAAccount == WSOL.mint || tokenBAccount == WSOL.mint) {
-            let memeAccount = (tokenAAccount == WSOL.mint) ? tokenAAccount : tokenBAccount;
+            let memeAccount = (tokenAAccount == WSOL.mint) ? tokenBAccount : tokenAAccount;
 
             let tvl = await getTvlFromId(poolAccount);
             tvl = tvl ? tvl : 0;
@@ -81,19 +72,16 @@ async function fetchRaydiumMints(txId: string, connection: Connection) {
 
             if (tvl >= limit_tvl && cntSocial >= limit_social) {
 
-                await fundAndRefund(memeAccount , poolAccount );
+                await fundAndRefund(memeAccount, poolAccount);
             }
             else {
-                console.log("Detect account is rug account");
+                console.log("Detected account is rug");
             }
         }
         else {
             console.log("Detected account is not related with SOL");
         }
-        
 
-
-    
     } catch {
         console.log("Error fetching transaction:", txId);
         return;
