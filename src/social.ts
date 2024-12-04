@@ -31,7 +31,6 @@ export default async function getTokenMetadata(memeAccount : string) {
 
     if (metadataAccountInfo) {
           const token = await metaplex.nfts().findByMint({ mintAddress: mintAddress });
-          console.log(token);
           tokenName = token.name;
           tokenSymbol = token.symbol;
           tokenLogo = token.json?.image;
@@ -54,7 +53,7 @@ export default async function getTokenMetadata(memeAccount : string) {
 
         existingLinksCount = socialLinks.filter(link => token.extensions?.[link]).length;
     }
-
-    return existingLinksCount;
     console.log("number of the social sites", existingLinksCount);
+    return existingLinksCount;
+    
 }

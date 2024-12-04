@@ -4,7 +4,7 @@
   "main": "main.ts",
   "license": "MIT",
   "scripts": {
-    "swap": "ts-node src/main.ts",
+    "swap": "ts-node src/raydiumSwap.ts",
     "create_w": "ts-node src/create_wallet.ts",
     "refund": "ts-node src/fund.ts",
     "monitoring": "ts-node src/monitoring.ts",

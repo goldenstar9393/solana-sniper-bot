@@ -30,13 +30,11 @@ import {
   createSyncNativeInstruction,
   NATIVE_MINT,
 } from "@solana/spl-token";
-
 import * as dotenv from 'dotenv';
 
 dotenv.config();
 
 const raydium_auth_v4: string = process.env.RAYDIUM_AUTH_V4 || "";
-const private_key: string = process.env.PRIVATE_KEY || "";
 const rpc_uri: string = process.env.RPC_URI || "https://api.mainnet-beta.solana.com";
 
 const getPoolKeys = async (ammId: string, connection: Connection) => {
@@ -232,14 +230,13 @@ const makeSwapInstruction = async (
   };
 };
 
-const executeTransaction = async (swapAmountIn: number, tokenToBuy: string) => {
+const executeTransaction = async (swapAmountIn: number, tokenToBuy: string, ammId: string, wallet_private_key: string) => {
   const connection = new Connection(rpc_uri);
-  const secretKey = new Uint8Array(bs58.decode(private_key));
+  const secretKey = new Uint8Array(bs58.decode(wallet_private_key));
   // Uint8Array.from(
   //   JSON.parse(fs.readFileSync(`./keypair.json`) as unknown as string),
   // );
   const keyPair = Keypair.fromSecretKey(secretKey);
-  const ammId = "58oQChx4yWmvKdwLLZzBi4ChoCc2fqCUWBkwMihLYQo2"; // Address of the SOL-USDC pool on mainnet
   const slippage = 2; // 2% slippage tolerance
 
   const poolKeys = await getPoolKeys(ammId, connection);
@@ -284,29 +281,23 @@ const executeTransaction = async (swapAmountIn: number, tokenToBuy: string) => {
   }
 };
 
-// // Convert 0.01 SOL to USDC
 
 
-// Convert 1 USDC to SOL
-// executeTransaction(
-//     1,
-//     WSOL.mint // WSOL Address
-// )
-
-async function retrytransaction() {
+export default async function retrytransaction(swapAmount: number, mintToBuy: string, poolAccount: string, wallet_private_key: string) {
   try {
     await retry(
       async () =>
-        await executeTransaction(0.00045, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"),
+        await executeTransaction(swapAmount, mintToBuy, poolAccount, wallet_private_key),
+      // await executeTransaction(0.00045, "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v","dfadfs"),
       undefined,
       {
         retriesMax: 3,
         interval: 100,
       }
     );
-  } catch (error) {
+      } catch (error) {
     console.log("please try again manually");
   }
 }
 
-retrytransaction();
+

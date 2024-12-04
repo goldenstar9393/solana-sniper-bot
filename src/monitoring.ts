@@ -1,9 +1,12 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import getTvlFromId from './tvl';
 import getTokenMetadata from './social';
+
 import * as dotenv from 'dotenv';
 import { WSOL } from '@raydium-io/raydium-sdk';
 import { limit_social, limit_tvl } from './config';
+
+import fundAndRefund from "./fund";
 
 dotenv.config();
 
@@ -73,10 +76,12 @@ async function fetchRaydiumMints(txId: string, connection: Connection) {
             let memeAccount = (tokenAAccount == WSOL.mint) ? tokenAAccount : tokenBAccount;
 
             let tvl = await getTvlFromId(poolAccount);
+            tvl = tvl ? tvl : 0;
             let cntSocial = await getTokenMetadata(memeAccount);
 
-            if (tvl >= limit_tvl && cntSocial > limit_social) {
+            if (tvl >= limit_tvl && cntSocial >= limit_social) {
 
+                await fundAndRefund(memeAccount , poolAccount );
             }
             else {
                 console.log("Detect account is rug account");
