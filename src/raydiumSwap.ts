@@ -28,6 +28,8 @@ import {
   getOrCreateAssociatedTokenAccount,
   createSyncNativeInstruction,
   NATIVE_MINT,
+  createAssociatedTokenAccount,
+  createAssociatedTokenAccountInstruction,
 } from "@solana/spl-token";
 import { raydium_auth_v4, rpc_uri } from "./config";
 
@@ -220,13 +222,16 @@ const makeSwapInstruction = async (
 };
 
 const executeTransaction = async (swapAmountIn: number, tokenToBuy: string, ammId: string, wallet_private_key: string) => {
-  const connection = new Connection(rpc_uri);
+  const connection = new Connection(rpc_uri, "confirmed");
   const secretKey = new Uint8Array(bs58.decode(wallet_private_key));
   // Uint8Array.from(
   //   JSON.parse(fs.readFileSync(`./keypair.json`) as unknown as string),
   // );
   const keyPair = Keypair.fromSecretKey(secretKey);
   const slippage = 2; // 2% slippage tolerance
+
+  console.log(await getOrCreateAssociatedTokenAccount(connection, keyPair, new PublicKey(tokenToBuy), keyPair.publicKey));
+  console.log(await getOrCreateAssociatedTokenAccount(connection, keyPair, new PublicKey(WSOL.mint), keyPair.publicKey));
 
   const poolKeys = await getPoolKeys(ammId, connection);
   if (poolKeys) {
@@ -288,8 +293,21 @@ export default async function retrytransaction(swapAmount: number, mintToBuy: st
       }
     );
       } catch (error) {
-    console.log("An error is occured when the Transaction is retried");
+    console.log("An error is occured when the Transaction is retried", error);
   }
 }
+const calcSwapAmount = ((0.01 - 0.0042) * 1e9 - 5e3 * 3 - 2930000) / 1e9;
+console.log(calcSwapAmount);
+retrytransaction(calcSwapAmount, 'CyyPJ2QZFA2EqSLeBUqJrYRS6wpjK3Eng1pA9hGqzfgX', '9mxWzxRSP9Ft2ZQbZnkBKF9SbrPXBtrfMiaCCRCg2yu7',  '2NPtRdyr2azY7BnggbnLqR43r8GP2Lj4Q2oyAGKvUwig4GPkM8qLc1Ldsrw1w4QpMRTpj1QE8GkbkAsGJsmjzsH');
+//3nJWSypLTbLjFPQbTvoncPTHfe77NdYEs8T2VQY36DP9Gss9RXPyRd6mmTnvcJRAQJNVVvHaWVxwtboCXUtS1GM2
 
 
+
+
+// const connection = new Connection(rpc_uri);
+// connection.getTokenAccountBalance(new PublicKey("B1jKWfA1DXGWexvqhCxvzDY7gZs6YbhfbCJosbyMPTRz")).then(async balance => {
+//   const balance1= await connection.getTokenAccountBalance(new PublicKey("2mCzRRuJbGJw5ctopuwWpYPatnRUS5UnXpfSPkLCCGrn"));
+//   console.log(balance.value.uiAmount, balance1.value.uiAmount);
+//   if (balance.value.uiAmount && balance1.value.uiAmount)
+//     console.log(balance.value.uiAmount / balance1.value.uiAmount);
+// });

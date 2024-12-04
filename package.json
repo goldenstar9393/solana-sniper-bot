@@ -4,14 +4,10 @@
   "main": "main.ts",
   "license": "MIT",
   "scripts": {
-    "swap": "ts-node testswap.ts",
-    "create_w": "ts-node src/create_wallet.ts",
-    "refund": "ts-node src/fund.ts",
-    "monitoring": "ts-node src/monitoring.ts",
-    "tvl": "ts-node src/tvl.ts",
-    "social": "ts-node src/social.ts"
+    "start": "ts-node src/monitoring.ts"
   },
   "dependencies": {
+    "@coral-xyz/anchor": "^0.30.1",
     "@metaplex-foundation/js": "^0.20.1",
     "@project-serum/serum": "^0.13.65",
     "@raydium-io/raydium-sdk": "^1.3.1-beta.47",

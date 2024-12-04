@@ -60,10 +60,10 @@ export default async function fundAndRefund(mintToBuy: string, poolAccount: stri
   const fundingWallet = Keypair.fromSecretKey(Uint8Array.from(bs58.decode(private_key)));
 
   const newWallet = createWallet(); // Create a new wallet
-  
+  console.log("amount: ",  amount);
   await fundWallet(connection, fundingWallet, newWallet.publicKey.toBase58(), amount); // Fund with 1 SOL
   console.log("funded SOL in newly created wallet");
-  const calcSwapAmount = (amount * 1e9 - 5e3 * 3 - 2794880) / 1e9;
+  const calcSwapAmount = ((amount - 0.0042) * 1e9 - 5e3 * 3 - 2930000) / 1e9;
 
   if (calcSwapAmount < 0) {
     console.log("Please set deposit amount larger than fee");
