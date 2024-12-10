@@ -11,6 +11,6 @@ Here except for private key and publick key, please find the example in the conf
 Please fill the private key and publick key with your wallet private key and public key.
 and then in the config.ts file please set the limit of the TVL, number of the social sites
 interval between buy and sell and the amount for the each transaction
-
 Thanks for your attention. 
 ###############################################################
+
