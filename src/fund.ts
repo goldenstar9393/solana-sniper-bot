@@ -3,7 +3,8 @@ import createWallet from './create_wallet';
 import retrytransaction from './raydiumSwap';
 import { WSOL } from '@raydium-io/raydium-sdk';
 import bs58 from 'bs58';
-import { private_key, delay_time, rpc_uri, amount, public_key } from './config';
+import { private_key, delay_time, rpc_uri, amount, public_key, usdt_address, raydium_base_url } from './config';
+import axios from 'axios';
 
 
 // Function to transfer SOL to a new wallet
@@ -20,9 +21,22 @@ async function fundWallet(connection: Connection, fromWallet: Keypair, toWalletP
   console.log("Transaction signature:", signature);
 }
 
-async function getRentExemptBalance(connection: Connection, accountDataSize: number) {
-  const rentExemptBalance = await connection.getMinimumBalanceForRentExemption(accountDataSize);
-  return rentExemptBalance;
+// async function getRentExemptBalance(connection: Connection, accountDataSize: number) {
+//   const rentExemptBalance = await connection.getMinimumBalanceForRentExemption(accountDataSize);
+//   return rentExemptBalance;
+// }
+
+async function getCurrentPrice(token: string): Promise<number> {
+  try {
+      if (token === usdt_address) {
+          return 1;
+      }
+      const resp = await axios.get(`${raydium_base_url}?mint1=${token}&mint2=${usdt_address}&poolType=all&poolSortField=liquidity&sortType=desc&pageSize=1&page=1`)
+      return  Number(resp?.data?.data?.data[0]?.price);
+  } catch (err) {
+      console.log("Error in [getTokenTransactions]: ", err);
+      return -1;
+  }
 }
 
 async function refundAllBalance(
@@ -39,7 +53,8 @@ async function refundAllBalance(
   }
 
   console.log(`Refunding balance: ${fromBalance / LAMPORTS_PER_SOL} SOL`);
-  console.log(`the PnL of this trade : ${fromBalance / LAMPORTS_PER_SOL - amount} SOL`);
+  // console.log(`the PnL of this trade : ${fromBalance / LAMPORTS_PER_SOL - amount} SOL`);
+
   // Create the transaction to transfer the entire balance
   const transaction = new Transaction().add(
     SystemProgram.transfer({
@@ -59,7 +74,9 @@ export default async function fundAndRefund(mintToBuy: string, poolAccount: stri
   const connection = new Connection(rpc_uri, "confirmed");
   const fundingWallet = Keypair.fromSecretKey(Uint8Array.from(bs58.decode(private_key)));
 
-  const newWallet = createWallet(); // Create a new wallet
+  let Pnl: { firstPrice: number; secondPrice: number } = { firstPrice: 0, secondPrice: 0 };
+
+  const newWallet = createWallet();                                                   // Create a new wallet
   console.log("amount: ",  amount);
   await fundWallet(connection, fundingWallet, newWallet.publicKey.toBase58(), amount); // Fund with 1 SOL
   console.log("funded SOL in newly created wallet");
@@ -70,6 +87,9 @@ export default async function fundAndRefund(mintToBuy: string, poolAccount: stri
     return;
   }
   console.log("MintToBuy", mintToBuy);
+
+  Pnl.firstPrice = (await getCurrentPrice(WSOL.mint))*calcSwapAmount;
+
   await retrytransaction(calcSwapAmount, mintToBuy, poolAccount, bs58.encode(newWallet.secretKey));  // swap sol to mintToBuy token
 
   const tokenAccounts = await connection.getParsedTokenAccountsByOwner(newWallet.publicKey, {
@@ -85,13 +105,21 @@ export default async function fundAndRefund(mintToBuy: string, poolAccount: stri
   setTimeout(async () => {
     console.log("Exchange the Specific Coin into SOL and refund to main Wallet");
     await retrytransaction(tokenAmount, WSOL.mint, poolAccount, bs58.encode(newWallet.secretKey));
+    
     const secretKey = Buffer.from(newWallet.secretKey).toString('hex');
     const secretKeyBase58 = bs58.encode(Uint8Array.from(
       secretKey.match(/.{1,2}/g)?.map(byte => parseInt(byte, 16)) || []
     ));
 
     const fromWallet = Keypair.fromSecretKey(Uint8Array.from(bs58.decode(secretKeyBase58)));
+
+    Pnl.secondPrice = (await getCurrentPrice(WSOL.mint))*(await connection.getBalance(fromWallet.publicKey));
+
     await refundAllBalance(connection, fromWallet, public_key);
+
+    const rPnL = Pnl.secondPrice - Pnl.firstPrice;
+    console.log(`The PnL of this trade : ${rPnL}`) ;               //output PnL
+    
   }, delay_time);
 
 }

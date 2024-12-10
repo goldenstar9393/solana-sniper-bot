@@ -13,3 +13,5 @@ export const rpc_uri: string = process.env.RPC_URI || "https://api.mainnet-beta.
 export const amount: number = Number(process.env.AMOUNT) || 0.003; // unit is sol
 export const public_key : string = process.env.PUBLIC_KEY || "";
 export const raydium_auth_v4: string = process.env.RAYDIUM_AUTH_V4 || "5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1";
+export const raydium_base_url : string = "https://api-v3.raydium.io/pools/info/mint";
+export const usdt_address: string = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB";
