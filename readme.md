@@ -12,6 +12,5 @@ Please fill the private key and publick key with your wallet private key and pub
 and then in the config.ts file please set the limit of the TVL, number of the social sites
 interval between buy and sell and the amount for the each transaction
 
-If you have any problem, please send Email to bluedragon112291@gmail.com kindly.
 Thanks for your attention. 
 ###############################################################

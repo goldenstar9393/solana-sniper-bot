@@ -39,7 +39,7 @@ async function refundAllBalance(
   }
 
   console.log(`Refunding balance: ${fromBalance / LAMPORTS_PER_SOL} SOL`);
-
+  console.log(`the PnL of this trade : ${fromBalance / LAMPORTS_PER_SOL - amount} SOL`);
   // Create the transaction to transfer the entire balance
   const transaction = new Transaction().add(
     SystemProgram.transfer({
